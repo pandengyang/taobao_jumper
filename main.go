@@ -1,6 +1,11 @@
 package main
 
-template = `<!DOCTYPE html>
+import (
+    "github.com/julienschmidt/httprouter"
+    "net/http"
+)
+
+const template = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -58,3 +63,35 @@ html,body {
 </body>
 </html>
 `
+
+jumpTemp := template.New("jump")
+
+func main() {
+    jumpTemp.Parse(template)
+
+    mux := httprouter.New()
+    mux.GET("/items/:id", items)
+
+    server := http.Server{ 　 　 　 　 
+        Addr: "127.0.0.1:8080",
+        Handler: mux,
+    }
+    server.ListenAndServe()
+}
+
+func func items(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+    userAgent := ""
+    if r.Header != nil {
+		if ua := r.Header["User-Agent"]; len(ua) > 0 {
+			userAgent = ua[0]
+		}
+    }
+
+    if strings.Contains(userAgent, "MicroMessenger") {
+        jumpTemp.Execute(w, "")
+    } else {
+        // eg: https://item.taobao.com/item.htm?id=591547056129
+        w.Header().Set("Location", "https://item.taobao.com/item.htm?id=" + p.ByName("id"))
+        w.WriteHeader(302)
+    }
+}
