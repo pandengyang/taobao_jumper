@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/julienschmidt/httprouter"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -86,7 +87,6 @@ func main() {
 	mux := httprouter.New()
 	mux.GET("/shops/:id", shops)
 	mux.GET("/items/:id", items)
-	mux.GET("/shops/:sid/categories/:id", categories)
 
 	server := http.Server{
 		Addr:    "127.0.0.1:10002",
@@ -94,6 +94,7 @@ func main() {
 	}
 	server.ListenAndServe()
 }
+
 func shops(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	userAgent := ""
 	if r.Header != nil {
@@ -104,7 +105,7 @@ func shops(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	if strings.Contains(userAgent, "MicroMessenger") {
 		Info.Println("MicroMessenger")
-		w.WriteString(jumpTempStr)
+		io.WriteString(w, jumpTempStr)
 	} else {
 		// eg: https://shop362549991.taobao.com
 		Info.Println("Other")
@@ -123,30 +124,11 @@ func items(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	if strings.Contains(userAgent, "MicroMessenger") {
 		Info.Println("MicroMessenger")
-		w.WriteString(jumpTempStr)
+		io.WriteString(w, jumpTempStr)
 	} else {
 		// eg: https://item.taobao.com/item.htm?id=591547056129
 		Info.Println("Other")
 		w.Header().Set("Location", "https://item.taobao.com/item.htm?id="+p.ByName("id"))
-		w.WriteHeader(302)
-	}
-}
-
-func categories(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	userAgent := ""
-	if r.Header != nil {
-		if ua := r.Header["User-Agent"]; len(ua) > 0 {
-			userAgent = ua[0]
-		}
-	}
-
-	if strings.Contains(userAgent, "MicroMessenger") {
-		Info.Println("MicroMessenger")
-		w.WriteString(jumpTempStr)
-	} else {
-		// https://shop362549991.taobao.com/category-1449696948.htm
-		Info.Println("Other")
-		w.Header().Set("Location", "https://shop"+p.ByName("sid")+".tabao.com/category-"+p.ByName("id")+".htm")
 		w.WriteHeader(302)
 	}
 }
