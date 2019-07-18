@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/julienschmidt/httprouter"
 	"io"
 	"log"
@@ -15,7 +16,7 @@ const jumpTempStr = `<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>小安阁</title>
+<title>雅赞小安家母婴小铺</title>
 <style>
 html,body {
     margin:0;
@@ -96,6 +97,14 @@ func main() {
 }
 
 func shops(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	defer func() {
+		if p := recover(); p != nil {
+			err := fmt.Errorf("shops error: %v", p)
+			Info.Println(err)
+		}
+
+	}()
+
 	userAgent := ""
 	if r.Header != nil {
 		if ua := r.Header["User-Agent"]; len(ua) > 0 {
@@ -115,6 +124,14 @@ func shops(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 
 func items(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	defer func() {
+		if p := recover(); p != nil {
+			err := fmt.Errorf("items error: %v", p)
+			Info.Println(err)
+		}
+
+	}()
+
 	userAgent := ""
 	if r.Header != nil {
 		if ua := r.Header["User-Agent"]; len(ua) > 0 {
